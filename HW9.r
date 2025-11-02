@@ -25,23 +25,29 @@ library(viridis)
 # FUNCTION #
 Simulate_lreg <- function(sims_n = 100, alpha = 13, beta = 7, sigma_vals = c(1, 10, 25)) {
   
-  lr_results <- list() # empty list to store linear regression results
+  lr_results <- data.frame( # empty long-form df to store linear regression results
+    x = numeric(0),
+    y = numeric(0),
+    sigma = factor()
+  )
   
   for (s in sigma_vals) {
-    x <- runif(sims_n, min = 0, max = 10) # sample from uniform distribution (for each sigma P(outcome) is the constant across sims)
-    epsilon <- rnorm(sims_n, mean = 0, sd = s) # sample from normal distribution
+    x <- runif(n = sims_n, min = 0, max = 10) # sample from uniform distribution (for each sigma P(outcome) is the constant across sims)
+    epsilon <- rnorm(n = sims_n, mean = 0, sd = s) # sample from normal distribution
     y <- alpha + beta * x + epsilon # structure regression equation
   
   
-    lr_results[[as.character(s)]] <- data.frame( # results list for each sim set of sigma values into column-labeled df
-      x = x,
-      y = y,
-      sigma = as.factor(s) 
+    lr_results <- rbind( # assign actual values from sims to empty df
+      lr_results, 
+      data.frame(
+        x = x,
+        y = y,
+        sigma = factor(s)
+      )
     )
   }
   
-  # combine all regression sim results dfs into one for ease of platting
-  sim_results <- bind_rows(lr_results)
+  return(lr_results)
 }
 
 # APPLY #
@@ -107,7 +113,7 @@ lr_plot
 
 Simulate_binom <- function(sims_n = 100, flips_n = 1:20, prob_vals = c(0.55, 0.6, 0.65), alpha = 0.05){
   
-  binom_results <- data.frame(prob = numeric(0), # empty df (of no set size) in long format to store function results
+  binom_results <- data.frame(prob = numeric(0), # empty long-form df to store function results
                               n_flips = numeric(0),
                               bias_det = numeric(0))
   
@@ -125,12 +131,12 @@ Simulate_binom <- function(sims_n = 100, flips_n = 1:20, prob_vals = c(0.55, 0.6
       }
       
       binom_results <- rbind(
-                            binom_results, # assign acutal values to empty df
-                            data.frame(
-                              prob = p,
-                              n_flips = f,
-                              bias_det = mean(outcomes_results) # in binom context mean = proportion
-                             )
+        binom_results, # assign acutal values to empty df
+        data.frame(
+         prob = p,
+         n_flips = f,
+        bias_det = mean(outcomes_results) # in binom context mean = proportion
+        )
       )
     }
   }
